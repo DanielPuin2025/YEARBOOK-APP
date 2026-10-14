@@ -1,0 +1,7 @@
+.git
+.gitignore
+.dockerignore
+**/node_modules
+backend/.env
+backend/uploads
+**/*.log

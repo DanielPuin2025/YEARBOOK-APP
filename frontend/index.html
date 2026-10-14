@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Year Book Digital · Megacolegio El Progreso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="bg-decor" aria-hidden="true">
+  <span class="decor-item d1">🎓</span>
+  <span class="decor-item d2">📖</span>
+  <span class="decor-item d3">✨</span>
+  <span class="decor-item d4">🎓</span>
+  <span class="decor-item d5">✨</span>
+  <span class="decor-item d6">📖</span>
+  <span class="decor-item d7">♡</span>
+  <span class="decor-item d8">✨</span>
+  <span class="decor-item d9">🎓</span>
+  <span class="decor-item d10">♡</span>
+  <span class="decor-item d11">📖</span>
+  <span class="decor-item d12">✨</span>
+  <span class="decor-item d13">🌟</span>
+  <span class="decor-item d14">📚</span>
+  <span class="decor-item d15">🎉</span>
+  <span class="decor-item d16">♡</span>
+  <span class="decor-item d17">🌟</span>
+  <span class="decor-item d18">🎓</span>
+  <span class="decor-item d19">📚</span>
+  <span class="decor-item d20">✨</span>
+  <span class="decor-item d21">📖</span>
+  <span class="decor-item d22">🌟</span>
+</div>
+
+<div id="app" class="phone-frame">
+
+  <!-- ============ PANTALLA 1: SPLASH / INFO DEL PROYECTO ============ -->
+  <section id="screen-splash" class="screen active">
+    <div class="brand-badge"><img src="assets/imagen sena.png" alt="SENA"></div>
+    <h1 class="title-yearbook">YEAR<br>BOOK</h1>
+    <p class="subtitle-ribbon">♥ ANUARIO DIGITAL ♥</p>
+    <div class="cover-photo-frame">
+      <img id="cover-photo" src="assets/escudo.png" alt="escudo del colegio" />
+    </div>
+    <div class="school-badge">
+      <div class="school-crest">MCP</div>
+      <p class="school-name">MEGACOLEGIO EL PROGRESO</p>
+      <p class="school-loc">YOPAL · CASANARE</p>
+    </div>
+    <p class="tagline">Un año para recordar,<br><em>una historia para siempre.</em> ♡</p>
+    <button class="btn btn-primary" onclick="goTo('screen-logo')">Entrar ♥</button>
+  </section>
+
+  <!-- ============ PANTALLA 2: LOGO + INICIAR SESIÓN ============ -->
+ <section id="screen-logo" class="screen">
+  <div class="logo-circle">
+    <img src="assets/logoA.png" alt="Logo" class="logo-circle-img">
+  </div>
+  <button class="btn btn-primary" onclick="goTo('screen-rol')">♥ Iniciar sesión ♥</button>
+  <button class="btn-link" onclick="abrirCreadoras()">👩‍💻 Creadoras</button>
+</section>
+
+  <!-- ============ PANTALLA 3: SELECCIÓN DE ROL ============ -->
+  <section id="screen-rol" class="screen">
+    <div class="logo-circle small">
+  <img src="assets/logoA.png" alt="Logo" class="logo-circle-img">
+</div>
+    <div class="rol-buttons">
+      <button class="btn btn-pink" onclick="entrarComoVisitante()">👤 Soy Visitante ♥</button>
+      <button class="btn btn-purple" onclick="goTo('screen-admin-login')">🛡️ Administrador ♥</button>
+    </div>
+  </section>
+
+  <!-- ============ PANTALLA 3b: LOGIN ADMINISTRADOR ============ -->
+  <section id="screen-admin-login" class="screen">
+     <div class="logo-circle small">
+  <img src="assets/logoA.png" alt="Logo" class="logo-circle-img">
+</div>
+    <h2 class="section-title">Acceso Administrador</h2>
+    <form id="form-admin-login" class="form-card" onsubmit="return loginAdmin(event)">
+      <label>Usuario
+        <input type="text" id="admin-usuario" placeholder="admin" required>
+      </label>
+      <label>Contraseña
+        <input type="password" id="admin-password" placeholder="••••••••" required>
+      </label>
+      <p id="admin-login-error" class="error-text"></p>
+      <button type="submit" class="btn btn-purple">Ingresar ♥</button>
+    </form>
+    <button class="btn-link" onclick="goTo('screen-rol')">← Volver</button>
+  </section>
+
+  <!-- ============ PANTALLA 4: BIENVENIDA ============ -->
+  <section id="screen-bienvenida" class="screen">
+    <div class="logo-circle small">
+  <img src="assets/logoA.png" alt="Logo" class="logo-circle-img">
+</div>
+   <div class="welcome-card">
+  <h2>¡Bienvenido a<br>Year Book Digital!</h2>
+  <p>Un espacio donde podrás explorar recuerdos, descubrir historias y revivir los momentos más importantes de una promoción única.</p>
+  <p>Más que un anuario, es una forma de preservar memorias que perduran en el tiempo.</p>
+  <p class="aviso-legal">
+    <strong>Información importante:</strong> El Year Book Digital tiene en cuenta la Ley 1581 de 2012, por la cual se dictan disposiciones generales para la protección de datos personales en Colombia. La información publicada en esta plataforma debe ser utilizada de manera responsable y respetando la privacidad de sus titulares. Las creadoras del proyecto no se hacen responsables del uso, reproducción o distribución que terceras personas puedan realizar de esta información fuera de la plataforma.
+  </p>
+</div>
+    <button class="btn btn-primary" onclick="goTo('screen-anio')">♥ Siguiente ♥</button>
+<button class="btn-link" onclick="goTo('screen-rol')">← Volver</button>
+</section>
+
+<!-- ============ OVERLAY CREADORAS DEL PROYECTO ============ -->
+<!-- ============ CREADORAS DEL PROYECTO ============ -->
+<div id="overlay-creadoras" class="overlay">
+
+  <div class="creadoras-card">
+
+    <h2>CREADORAS DEL PROYECTO</h2>
+
+    <div class="despedida-divider">✦ ♥ ✦</div>
+
+    <div class="creadoras-list">
+
+      <div class="creadora-item">
+        <h3>Diana Carolina Argüello Rojas</h3>
+        <p>Rol: Líder del proyecto</p>
+      </div>
+
+      <div class="creadora-item">
+        <h3>Sara Yulieth León Hernández</h3>
+        <p>Rol: Programadora</p>
+      </div>
+
+      <div class="creadora-item">
+        <h3>Laurymar Esmerita Cabrera González</h3>
+        <p>Rol: Diseñadora</p>
+      </div>
+
+    </div>
+
+    <button class="btn btn-primary" onclick="cerrarCreadoras()">
+      ♥ Cerrar ♥
+    </button>
+
+  </div>
+
+</div>
+
+  <!-- ============ PANTALLA 5: AÑO / GRADOS ============ -->
+  <section id="screen-anio" class="screen">
+     <div class="logo-circle small">
+  <img src="assets/logoA.png" alt="Logo" class="logo-circle-img">
+</div>
+   <h1 id="year-title" class="year-title">2026</h1>
+<div id="selector-anios" class="anios-selector"></div>
+    <div id="lista-grados" class="grados-list"></div>
+    <p id="grados-vacio" class="empty-text" style="display:none;">No hay grados registrados todavía.</p>
+    <button class="btn-link" onclick="volverDesdeGrados()">← Volver</button>
+  </section>
+
+  <!-- ============ PANTALLA 6: LISTA DE ESTUDIANTES ============ -->
+  <section id="screen-estudiantes" class="screen">
+    <div class="grado-chip" id="grado-actual-chip">11-A</div>
+    <div id="grid-estudiantes" class="students-grid"></div>
+    <p id="estudiantes-vacio" class="empty-text" style="display:none;">Aún no hay estudiantes en este grado.</p>
+    <button class="btn-link" onclick="goTo('screen-anio')">← Volver</button>
+  </section>
+
+  <!-- ============ PANTALLA 7: PERFIL DE ESTUDIANTE ============ -->
+  <section id="screen-perfil" class="screen">
+    <div class="perfil-name-chip" id="perfil-nombre">Nombre Estudiante</div>
+    <div class="perfil-photo-frame">
+      <img id="perfil-foto" src="assets/foto-placeholder.svg" alt="Foto del estudiante">
+    </div>
+    <div class="perfil-buttons">
+      <button class="btn-heart" id="btn-me-gusta" onclick="toggleMensajeDespedida()">✉</button>
+      <button class="btn btn-purple" onclick="toggleFrase()">Frase</button>
+    </div>
+    <p id="perfil-frase" class="perfil-frase-text" style="display:none;"></p>
+    <button class="btn-link" onclick="goTo('screen-estudiantes')">♥ Volver ♥</button>
+  </section>
+
+  <!-- ============ OVERLAY MENSAJE DE DESPEDIDA ============ -->
+  <div id="overlay-despedida" class="overlay">
+    <div class="despedida-card">
+      <p class="despedida-heart">♥</p>
+      <h2>MENSAJE DE<br>DESPEDIDA</h2>
+      <div class="despedida-divider">✦ ♥ ✦</div>
+      <p id="despedida-texto" class="despedida-texto"></p>
+      <div class="despedida-divider">✦ ♥ ✦</div>
+      <button class="btn btn-primary" onclick="cerrarDespedida()">♥ Cerrar ♥</button>
+    </div>
+  </div>
+
+  <!-- ============ PANEL ADMINISTRADOR ============ -->
+  <section id="screen-admin-panel" class="screen">
+    <h2 class="section-title">Panel de Administrador</h2>
+
+    <div class="admin-tabs">
+      <button class="tab-btn active" data-tab="tab-grados" onclick="mostrarTabAdmin('tab-grados')">Grados</button>
+      <button class="tab-btn" data-tab="tab-estudiantes" onclick="mostrarTabAdmin('tab-estudiantes')">Estudiantes</button>
+    </div>
+
+    <!-- TAB GRADOS -->
+    <div id="tab-grados" class="admin-tab active">
+      <form id="form-nuevo-grado" class="form-card" onsubmit="return crearGrado(event)">
+        <label>Nombre del grado (Ej: 11-A)
+          <input type="text" id="nuevo-grado-nombre" required>
+        </label>
+        <label>Año
+          <input type="number" id="nuevo-grado-anio" value="2026" required>
+        </label>
+        <button type="submit" class="btn btn-purple">+ Agregar grado</button>
+      </form>
+      <div id="admin-lista-grados" class="admin-list"></div>
+    </div>
+
+    <!-- TAB ESTUDIANTES -->
+    <div id="tab-estudiantes" class="admin-tab">
+      <form id="form-estudiante" class="form-card" onsubmit="return guardarEstudiante(event)">
+        <input type="hidden" id="estudiante-id">
+        <label>Grado
+          <select id="estudiante-grado" required></select>
+        </label>
+        <label>Nombre completo
+          <input type="text" id="estudiante-nombre" required>
+        </label>
+        <label>Frase
+          <input type="text" id="estudiante-frase" placeholder="Ej: Soñar en grande nunca pasa de moda.">
+        </label>
+        <label>Mensaje de despedida
+          <textarea id="estudiante-mensaje" rows="3" placeholder="Mensaje que verá al presionar ♥"></textarea>
+        </label>
+        <label>Foto
+          <input type="file" id="estudiante-foto" accept="image/*">
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-purple" id="btn-guardar-estudiante">Guardar estudiante</button>
+          <button type="button" class="btn-link" id="btn-cancelar-edicion" onclick="cancelarEdicionEstudiante()" style="display:none;">Cancelar edición</button>
+        </div>
+      </form>
+      <div id="admin-lista-estudiantes" class="admin-list"></div>
+    </div>
+
+    <button class="btn-link" onclick="cerrarSesionAdmin()">← Cerrar sesión</button>
+  </section>
+
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
