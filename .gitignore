@@ -4,3 +4,5 @@ backend/uploads/*
 **/node_modules/
 .DS_Store
 Thumbs.db
+database/yearbook_db.sql
+yerabook-app actualizado.zip

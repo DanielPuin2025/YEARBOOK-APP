@@ -1,14 +1,22 @@
 const BACKEND_URL = location.protocol === 'file:' ? 'http://localhost:4000' : location.origin;
 const API_BASE = `${BACKEND_URL}/api`;
+const FOTO_PLACEHOLDER = 'assets/foto-placeholder.svg';
 
-let estadoApp = {
-  rol: null,
-  gradoActual: null,
-  estudianteActual: null,
-  gradosCache: [],
-  anioActual: null,
-  editandoEstudianteId: null
-};
+function obtenerUrlFoto(fotoUrl) {
+  return fotoUrl ? new URL(fotoUrl, BACKEND_URL).href : FOTO_PLACEHOLDER;
+}
+
+function configurarFoto(img, fotoUrl) {
+  img.onerror = () => {
+    img.onerror = null;
+    img.src = FOTO_PLACEHOLDER;
+  };
+  img.src = fotoUrl || FOTO_PLACEHOLDER;
+}
+
+document.querySelectorAll('#overlay-creadoras .creadora-item img').forEach(img => {
+  configurarFoto(img, img.getAttribute('src'));
+});
 
 function fetchAdmin(url, options = {}) {
   const token = sessionStorage.getItem('adminToken');
@@ -26,6 +34,15 @@ function fetchAdmin(url, options = {}) {
     return response;
   });
 }
+
+let estadoApp = {
+  rol: null,
+  gradoActual: null,
+  estudianteActual: null,
+  gradosCache: [],
+  anioActual: null,
+  editandoEstudianteId: null
+};
 
 function goTo(idPantalla) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -45,28 +62,46 @@ async function cargarGrados() {
   const cont = document.getElementById('lista-grados');
   const vacio = document.getElementById('grados-vacio');
   cont.innerHTML = '<p class="empty-text">Cargando grados...</p>';
+  document.getElementById('selector-anios').innerHTML = '';
+  vacio.style.display = 'none';
   try {
-    const res = await fetch(`${API_BASE}/grados`);
+    const res = await fetch(`${API_BASE}/grados`, { cache: 'no-store' });
+    if (!res.ok) {
+      throw new Error(`El servidor respondió con el estado ${res.status}.`);
+    }
     const grados = await res.json();
-    estadoApp.gradosCache = grados;
-    if (grados.length === 0) {
+    if (!Array.isArray(grados) || grados.some(g => !g || !g.nombre || !Number.isFinite(Number(g.anio)))) {
+      throw new Error('El servidor devolvió una lista de grados inválida.');
+    }
+    estadoApp.gradosCache = grados.map(g => ({ ...g, anio: Number(g.anio) }));
+    if (estadoApp.gradosCache.length === 0) {
       cont.innerHTML = '';
-      document.getElementById('selector-anios').innerHTML = '';
       vacio.style.display = 'block';
       return;
     }
     vacio.style.display = 'none';
 
     // Cada año que agregues en el panel de administrador sale como un botón
-    const anios = [...new Set(grados.map(g => g.anio))].sort((a, b) => a - b);
+    const anios = [...new Set(estadoApp.gradosCache.map(g => g.anio))].sort((a, b) => a - b);
     if (!anios.includes(estadoApp.anioActual)) {
       estadoApp.anioActual = anios.includes(ANIO_PREDETERMINADO) ? ANIO_PREDETERMINADO : anios[anios.length - 1];
     }
     renderSelectorAnios(anios);
     renderGradosDelAnio();
   } catch (err) {
-    cont.innerHTML = '<p class="empty-text">No se pudo conectar con el servidor. Verifica que el backend esté encendido.</p>';
-    console.error(err);
+    estadoApp.gradosCache = [];
+    const mensaje = document.createElement('p');
+    mensaje.className = 'empty-text';
+    mensaje.textContent = err instanceof TypeError
+      ? 'No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.'
+      : `No se pudieron cargar los grados. ${err.message}`;
+    const reintentar = document.createElement('button');
+    reintentar.className = 'btn-link';
+    reintentar.type = 'button';
+    reintentar.textContent = 'Intentar de nuevo';
+    reintentar.onclick = cargarGrados;
+    cont.replaceChildren(mensaje, reintentar);
+    console.error('Error al cargar los grados:', err);
   }
 }
 
@@ -131,11 +166,11 @@ async function cargarEstudiantes(gradoId) {
     estudiantes.forEach(e => {
       const card = document.createElement('div');
       card.className = 'student-card';
-      const foto = e.foto_url ? `${BACKEND_URL}${e.foto_url}` : 'assets/foto-placeholder.svg';
       card.innerHTML = `
-        <img class="mini-photo" src="${foto}" alt="${e.nombre}">
+        <img class="mini-photo" alt="${e.nombre}">
         <span class="mini-name">${e.nombre}</span>
       `;
+      configurarFoto(card.querySelector('.mini-photo'), obtenerUrlFoto(e.foto_url));
       card.onclick = () => verPerfil(e);
       grid.appendChild(card);
     });
@@ -148,8 +183,7 @@ async function cargarEstudiantes(gradoId) {
 function verPerfil(estudiante) {
   estadoApp.estudianteActual = estudiante;
   document.getElementById('perfil-nombre').textContent = estudiante.nombre;
-  const foto = estudiante.foto_url ? `${BACKEND_URL}${estudiante.foto_url}` : 'assets/foto-placeholder.svg';
-  document.getElementById('perfil-foto').src = foto;
+  configurarFoto(document.getElementById('perfil-foto'), obtenerUrlFoto(estudiante.foto_url));
   document.getElementById('perfil-frase').textContent = estudiante.frase || 'Este estudiante no escribió una frase.';
   document.getElementById('perfil-frase').style.display = 'none';
   goTo('screen-perfil');
@@ -188,6 +222,10 @@ async function loginAdmin(evento) {
     const data = await res.json();
     if (!res.ok) {
       errorEl.textContent = data.error || 'No se pudo iniciar sesión.';
+      return false;
+    }
+    if (!data.token) {
+      errorEl.textContent = 'El servidor no devolvió una sesión válida.';
       return false;
     }
     sessionStorage.setItem('adminToken', data.token);
@@ -271,7 +309,12 @@ async function cargarGradosAdmin() {
 
 async function eliminarGrado(id) {
   if (!confirm('¿Eliminar este grado y todos sus estudiantes?')) return;
-  await fetchAdmin(`${API_BASE}/grados/${id}`, { method: 'DELETE' });
+  const res = await fetchAdmin(`${API_BASE}/grados/${id}`, { method: 'DELETE' });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    alert(data.error || 'Error al eliminar el grado.');
+    return;
+  }
   cargarGradosAdmin();
   cargarEstudiantesAdminSelect();
   cargarEstudiantesAdminLista();
@@ -279,34 +322,75 @@ async function eliminarGrado(id) {
 
 async function cargarEstudiantesAdminSelect() {
   const select = document.getElementById('estudiante-grado');
+  const valorPrevio = select.value;
   select.innerHTML = '';
   const grados = estadoApp.gradosCache.length ? estadoApp.gradosCache : await (await fetch(`${API_BASE}/grados`)).json();
+  estadoApp.gradosCache = grados;
+  // Un grupo por año: "Año 2026", "Año 2027", ...
+  let grupo = null;
+  let anioPrevio = null;
   grados.forEach(g => {
+    if (g.anio !== anioPrevio) {
+      grupo = document.createElement('optgroup');
+      grupo.label = `Año ${g.anio}`;
+      select.appendChild(grupo);
+      anioPrevio = g.anio;
+    }
     const opt = document.createElement('option');
     opt.value = g.id;
     opt.textContent = `${g.nombre} · ${g.anio}`;
-    select.appendChild(opt);
+    grupo.appendChild(opt);
   });
+  if (valorPrevio) select.value = valorPrevio;
 }
 
 async function cargarEstudiantesAdminLista() {
   const cont = document.getElementById('admin-lista-estudiantes');
   cont.innerHTML = 'Cargando...';
   try {
+    if (!estadoApp.gradosCache.length) {
+      estadoApp.gradosCache = await (await fetch(`${API_BASE}/grados`)).json();
+    }
     const res = await fetch(`${API_BASE}/estudiantes`);
     const estudiantes = await res.json();
+    const gradoDe = id => estadoApp.gradosCache.find(g => g.id === id) || { nombre: 'Sin grado', anio: 0 };
+
+    // Orden: año (más reciente primero), grado y nombre
+    estudiantes.sort((a, b) => {
+      const ga = gradoDe(a.grado_id), gb = gradoDe(b.grado_id);
+      return (gb.anio - ga.anio) || ga.nombre.localeCompare(gb.nombre) || a.nombre.localeCompare(b.nombre);
+    });
+
     cont.innerHTML = '';
+    let anioPrevio = null;
+    let gradoPrevio = null;
     estudiantes.forEach(e => {
-      const foto = e.foto_url ? `${BACKEND_URL}${e.foto_url}` : 'assets/foto-placeholder.svg';
+      const g = gradoDe(e.grado_id);
+      if (g.anio !== anioPrevio) {
+        const tAnio = document.createElement('h3');
+        tAnio.className = 'admin-anio-titulo';
+        tAnio.textContent = `Año ${g.anio}`;
+        cont.appendChild(tAnio);
+        anioPrevio = g.anio;
+        gradoPrevio = null;
+      }
+      if (e.grado_id !== gradoPrevio) {
+        const tGrado = document.createElement('h4');
+        tGrado.className = 'admin-grado-titulo';
+        tGrado.textContent = `Grado ${g.nombre}`;
+        cont.appendChild(tGrado);
+        gradoPrevio = e.grado_id;
+      }
       const item = document.createElement('div');
       item.className = 'admin-item';
       item.innerHTML = `
-        <img src="${foto}" alt="${e.nombre}">
+        <img alt="${e.nombre}">
         <div class="info"><strong>${e.nombre}</strong><span>${e.frase || 'Sin frase'}</span></div>
         <div class="actions">
           <button class="btn-editar" onclick='editarEstudiante(${JSON.stringify(e)})'>Editar</button>
           <button class="btn-eliminar" onclick="eliminarEstudiante(${e.id})">Eliminar</button>
         </div>`;
+      configurarFoto(item.querySelector('img'), obtenerUrlFoto(e.foto_url));
       cont.appendChild(item);
     });
   } catch (err) {
@@ -347,10 +431,13 @@ async function guardarEstudiante(evento) {
   if (fotoInput.files[0]) formData.append('foto', fotoInput.files[0]);
 
   try {
-    if (id) {
-      await fetchAdmin(`${API_BASE}/estudiantes/${id}`, { method: 'PUT', body: formData });
-    } else {
-      await fetchAdmin(`${API_BASE}/estudiantes`, { method: 'POST', body: formData });
+    const res = id
+      ? await fetchAdmin(`${API_BASE}/estudiantes/${id}`, { method: 'PUT', body: formData })
+      : await fetchAdmin(`${API_BASE}/estudiantes`, { method: 'POST', body: formData });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || 'Error al guardar el estudiante.');
+      return false;
     }
     cancelarEdicionEstudiante();
     cargarEstudiantesAdminLista();
@@ -363,7 +450,12 @@ async function guardarEstudiante(evento) {
 
 async function eliminarEstudiante(id) {
   if (!confirm('¿Eliminar este estudiante?')) return;
-  await fetchAdmin(`${API_BASE}/estudiantes/${id}`, { method: 'DELETE' });
+  const res = await fetchAdmin(`${API_BASE}/estudiantes/${id}`, { method: 'DELETE' });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    alert(data.error || 'Error al eliminar el estudiante.');
+    return;
+  }
   cargarEstudiantesAdminLista();
 }
 
@@ -392,3 +484,28 @@ function cerrarCreadoras() {
     overlay.classList.remove('active');
   }
 }
+
+/* ============ BOTÓN DE INICIO (casita) ============ */
+// Cambia 'screen-splash' por 'screen-logo' si quieres que la casita lleve a "Iniciar sesión"
+const PANTALLA_INICIO = 'screen-splash';
+
+function irAlInicio() {
+  sessionStorage.removeItem('adminToken');
+  estadoApp.rol = null;
+  document.querySelectorAll('.overlay.active').forEach(o => o.classList.remove('active'));
+  goTo(PANTALLA_INICIO);
+}
+
+function actualizarBotonInicio() {
+  const btn = document.getElementById('btn-inicio');
+  if (!btn) return;
+  // Se oculta solo en la pantalla de inicio
+  btn.style.display = document.getElementById(PANTALLA_INICIO).classList.contains('active') ? 'none' : 'flex';
+}
+
+const _goToConInicio = goTo;
+goTo = function (idPantalla) {
+  _goToConInicio(idPantalla);
+  actualizarBotonInicio();
+};
+actualizarBotonInicio();

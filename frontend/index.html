@@ -37,6 +37,15 @@
 
 <div id="app" class="phone-frame">
 
+    <!-- Botón de inicio (casita), visible en todas las pantallas menos en la portada -->
+  <button id="btn-inicio" class="btn-inicio" onclick="irAlInicio()" aria-label="Ir al inicio" title="Inicio" style="display:none;">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 11.5L12 4l9 7.5"></path>
+      <path d="M5.5 10v10h13V10"></path>
+      <path d="M10 20v-5.5h4V20"></path>
+    </svg>
+  </button>
+
   <!-- ============ PANTALLA 1: SPLASH / INFO DEL PROYECTO ============ -->
   <section id="screen-splash" class="screen active">
     <div class="brand-badge"><img src="assets/imagen sena.png" alt="SENA"></div>
@@ -60,7 +69,10 @@
     <img src="assets/logoA.png" alt="Logo" class="logo-circle-img">
   </div>
   <button class="btn btn-primary" onclick="goTo('screen-rol')">♥ Iniciar sesión ♥</button>
+  <div class="footer-derechos">
+  <p>©2026 Year Book Digital - Anuario Digital. Todos los derechos reservados por:</p>
   <button class="btn-link" onclick="abrirCreadoras()">👩‍💻 Creadoras</button>
+</div>
 </section>
 
   <!-- ============ PANTALLA 3: SELECCIÓN DE ROL ============ -->
@@ -72,6 +84,7 @@
       <button class="btn btn-pink" onclick="entrarComoVisitante()">👤 Soy Visitante ♥</button>
       <button class="btn btn-purple" onclick="goTo('screen-admin-login')">🛡️ Administrador ♥</button>
     </div>
+     <button class="btn-link" onclick="goTo('screen-logo')">← Volver</button>
   </section>
 
   <!-- ============ PANTALLA 3b: LOGIN ADMINISTRADOR ============ -->
@@ -113,38 +126,40 @@
 <!-- ============ OVERLAY CREADORAS DEL PROYECTO ============ -->
 <!-- ============ CREADORAS DEL PROYECTO ============ -->
 <div id="overlay-creadoras" class="overlay">
-
   <div class="creadoras-card">
 
     <h2>CREADORAS DEL PROYECTO</h2>
 
     <div class="despedida-divider">✦ ♥ ✦</div>
 
-    <div class="creadoras-list">
+    <div class="creadoras-grid">
 
-      <div class="creadora-item">
+    <div class="creadora-item">
+        <img src="assets/diana.jpeg" alt="Diana Carolina Arguello Rojas">
         <h3>Diana Carolina Argüello Rojas</h3>
-        <p>Rol: Líder del proyecto</p>
-      </div>
-
-      <div class="creadora-item">
-        <h3>Sara Yulieth León Hernández</h3>
-        <p>Rol: Programadora</p>
-      </div>
-
-      <div class="creadora-item">
-        <h3>Laurymar Esmerita Cabrera González</h3>
-        <p>Rol: Diseñadora</p>
-      </div>
-
+        <div class="creadora-linea"></div>
+        <p class="creadora-rol">Rol: Líder del proyecto</p>
     </div>
 
-    <button class="btn btn-primary" onclick="cerrarCreadoras()">
-      ♥ Cerrar ♥
-    </button>
+    <div class="creadora-item">
+        <img src="assets/sara.jpeg" alt="Sara Yulieth Leon Hernández">
+        <h3>Sara Yulieth León Hernández</h3>
+        <div class="creadora-linea"></div>
+        <p class="creadora-rol">Rol: Programadora</p>
+    </div>
+
+    <div class="creadora-item">
+        <img src="assets/laurymar.jpeg" alt="Laurymar Esmerita Cabrera Gonzalez">
+        <h3>Laurymar Esmerita Cabrera González</h3>
+        <div class="creadora-linea"></div>
+        <p class="creadora-rol">Rol: Diseñadora</p>
+    </div>
+
+</div>
+    <button class="btn btn-primary"
+            onclick="cerrarCreadoras()">♥ Cerrar ♥</button>
 
   </div>
-
 </div>
 
   <!-- ============ PANTALLA 5: AÑO / GRADOS ============ -->
